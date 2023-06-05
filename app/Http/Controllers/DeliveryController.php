@@ -19,33 +19,78 @@ class DeliveryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $deliveries = Delivery::where('status', '=', 'pending')->latest()->simplePaginate(5);
-        // $deliveries = Delivery::latest()->simplePaginate(5);
-        
-        return view('deliveries.index',compact('deliveries'))
-                    ->with('i', (request()->input('page', 1) - 1) * 5);
+        $search = $request->input('search');
+        $deliveries = Delivery::where('status', 'pending')
+            ->where(function ($query) use ($search) {
+                $query->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('email', 'like', '%'.$search.'%')
+                    ->orWhere('phone_number', 'like', '%'.$search.'%')
+                    ->orWhere('address', 'like', '%'.$search.'%')
+                    ->orWhere('address_detail', 'like', '%'.$search.'%')
+                    ->orWhere('quantity', 'like', '%'.$search.'%')
+                    ->orWhere('del_date', 'like', '%'.$search.'%')
+                    ->orWhere('message', 'like', '%'.$search.'%')
+                    ->orWhere('total', 'like', '%'.$search.'%')
+                    ->orWhere('status', 'like', '%'.$search.'%');
+            })
+            ->latest()
+            ->simplePaginate(5);
+
+        return view('deliveries.index', compact('deliveries'))
+            ->with('i', ($request->input('page', 1) - 1) * 5);
     }
+
 
 
 /////////////////////////////////////////////////////////////////////
-    public function delivering(): View
+    public function delivering(Request $request): View
     {
-        $deliveries = Delivery::where('status', '=', 'delivering')->latest()->simplePaginate(5);
-        
+        $search = $request->input('search');
+        $deliveries = Delivery::where('status', 'delivering')
+            ->where(function ($query) use ($search) {
+                $query->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('email', 'like', '%'.$search.'%')
+                    ->orWhere('phone_number', 'like', '%'.$search.'%')
+                    ->orWhere('address', 'like', '%'.$search.'%')
+                    ->orWhere('address_detail', 'like', '%'.$search.'%')
+                    ->orWhere('quantity', 'like', '%'.$search.'%')
+                    ->orWhere('del_date', 'like', '%'.$search.'%')
+                    ->orWhere('message', 'like', '%'.$search.'%')
+                    ->orWhere('total', 'like', '%'.$search.'%')
+                    ->orWhere('status', 'like', '%'.$search.'%');
+            })
+            ->latest()
+            ->simplePaginate(5);
+
         return view('deliveries.delivering', compact('deliveries'))
-            ->with('i', (request()->input('page', 1) - 1) * 5);
+            ->with('i', ($request->input('page', 1) - 1) * 5);
     }
 
 
+
 ////////////////////////////////////////////////////////////////////////
-    public function transact(): View
+    public function transact(Request $request): View
     {
-        $deliveries = Delivery::where('status', '=', 'delivered')->latest()->simplePaginate(5);
+        $search = $request->input('search');
+        
+        $deliveries = Delivery::where('status', '=', 'delivered')
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'LIKE', "%$search%")
+                        ->orWhere('email', 'LIKE', "%$search%")
+                        ->orWhere('phone_number', 'LIKE', "%$search%")
+                        ->orWhere('del_date', 'LIKE', "%$search%")
+                        ->orWhere('total', 'LIKE', "%$search%");
+                });
+            })
+            ->latest()
+            ->simplePaginate(5)
+            ->appends(['search' => $search]);
         
         return view('deliveries.transactions', compact('deliveries'))
-            ->with('i', (request()->input('page', 1) - 1) * 5);
+            ->with('i', ($deliveries->currentPage() - 1) * $deliveries->perPage());
     }
 
   
@@ -143,7 +188,7 @@ class DeliveryController extends Controller
     Mail::to($recipientEmail)->send(new accept($mailData));
     
     return redirect()->route('deliveries.index')
-                    ->with('success', 'Updated Successfully');
+                    ->with('success', 'Order Accepted');
     }
 
 ////////////////////////////////For UPDATE STATUS to TRANSACTION////////////////////////////////////////////////
@@ -164,7 +209,7 @@ class DeliveryController extends Controller
         Mail::to($recipientEmail)->send(new delivered($mailData));
 
         return redirect()->route('deliveries.delivering')
-                        ->with('success', 'Updated Successfully');
+                        ->with('success', 'Order Successfully Delivered');
     }
 
 

@@ -238,6 +238,10 @@
             quantity = 30;
             quantityInput.value = quantity;
         }
+        else if(quantity < 1) {
+            quantity = 1;
+            quantityInput.value = quantity;
+        }
 
         // Calculate the total
         const price = 25; // Price per product

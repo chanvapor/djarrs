@@ -69,7 +69,7 @@ Route::controller(LoginRegisterController::class)->group(function() {
         return view('userside');
     })->name('dantoy');
     Route::get('/delivering', [DeliveryController::class,'delivering'])->name('deliveries.delivering');
-    Route::get('/transact', [DeliveryController::class,'transact'])->name('');
+    Route::get('/transact', [DeliveryController::class,'transact'])->name('transact');
     
     //Show nessages table
     Route::get('/messages', [MessageController::class,'viewmessage'])->name('');
