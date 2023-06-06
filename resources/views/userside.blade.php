@@ -28,7 +28,7 @@
   <!-- Template Main CSS File -->
   <link href="{{ asset('import/assets/css/style.css') }}" rel="stylesheet">
 
-  @vite(['resources/css/app.css', 'resources/js/app.js'])
+
 
 
   <style>
